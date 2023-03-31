@@ -15,25 +15,36 @@ library(tidyverse)
 #                 `rh (%)`)
 # 
 # data = data %>%
-#   mutate(Date = format(as.Date(dmy_hms(`Date Time`)), "%Y-%m-%d")) %>%
+#   mutate(Date = format(as.Date(dmy_hms(`Date Time`)), "%Y-%m")) %>%
 #   group_by(Date) %>%
 #   summarise(Temperature = mean(`T (degC)`),
 #             RelativeHumidity = mean(`rh (%)`))
 # 
-# readr::write_csv(as.data.frame(data), file = "max_planck_weather_daily.csv")
+# readr::write_csv(as.data.frame(data), file = "max_planck_weather_monthly.csv")
 
 # importando dados
-data = read_csv("https://raw.githubusercontent.com/gabriel-alvaro/ME607-1S2023/main/models_EDA/max_planck_weather_daily.csv")
+data = read_csv("https://raw.githubusercontent.com/gabriel-alvaro/ME607-1S2023/main/models_EDA/max_planck_weather_monthly.csv") %>%
+  mutate(Date = yearmonth(Date)) %>%
+  as_tsibble()
 
-# grafico
-data %>% ggplot(aes(x = Date, y = Temperature)) +
-  geom_line() +
+autoplot(data, .vars = Temperature) +
   xlab("Date") +
   ylab("Temperature (Celsius)") +
-  theme_minimal() +
-  scale_x_date(date_labels = "%Y-%m-%d",
-               date_breaks = "1 year") +
   scale_y_continuous(n.breaks = 6) +
-  theme(axis.text.x=element_text(angle=60, hjust=1))
+  scale_x_yearmonth(date_breaks = "1 year",
+                    date_label = "%Y-%m") +
+  theme_bw()
+
+## MODELOS
+## media, naive, naive sazonal, drift, regressao linear, suavizacao exponencial
+
+data_train = data |>
+  stretch_tsibble(.step = 1, .init = 100)
+
+data_train |>
+  model(RW(Temperature ~ drift())) |>
+  forecast(h = 1) |>
+  accuracy(data)
+  
 
 
