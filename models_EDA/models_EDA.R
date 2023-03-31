@@ -6,8 +6,7 @@
 
 library(fable)
 library(fpp3)
-library(ggplot2)
-library(dplyr)
+library(tidyverse)
 
 ## TRATAMENTO DATASET
 ## dataset obtido no Kaggle: https://www.kaggle.com/datasets/arashnic/max-planck-weather-dataset
@@ -26,5 +25,18 @@ library(dplyr)
 # 
 # readr::write_csv(as.data.frame(data), file = "max_planck_weather_monthly.csv")
 
-data = readr::read_csv("https://raw.githubusercontent.com/gabriel-alvaro/ME607-1S2023/main/models_EDA/max_planck_weather_monthly.csv")
+# importando dados
+data = read_csv("https://raw.githubusercontent.com/gabriel-alvaro/ME607-1S2023/main/models_EDA/max_planck_weather_monthly.csv")
+
+# grafico
+data %>% ggplot(aes(x = as.Date(paste(Date, "-01", sep="")), y = Temperature)) +
+  geom_line() +
+  xlab("Data") +
+  ylab("Temperatura (Celsius)") +
+  scale_x_date(date_labels = "%Y-%m",
+               date_breaks = "1 year") +
+  scale_y_continuous(n.breaks = 6) +
+  theme(axis.text.x=element_text(angle=60, hjust=1))
+
+
 
