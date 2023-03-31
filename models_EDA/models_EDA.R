@@ -33,6 +33,7 @@ data %>% ggplot(aes(x = as.Date(paste(Date, "-01", sep="")), y = Temperature)) +
   geom_line() +
   xlab("Data") +
   ylab("Temperatura (Celsius)") +
+  theme_minimal() +
   scale_x_date(date_labels = "%Y-%m",
                date_breaks = "1 year") +
   scale_y_continuous(n.breaks = 6) +
