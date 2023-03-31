@@ -1,9 +1,6 @@
 ## Gabriel Alvaro Batista
 ## RA 171822
 
-## MODELOS:
-## media, naive, naive sazonal, drift, regressao, suavizacao exponencial
-
 library(fable)
 library(fpp3)
 library(tidyverse)
@@ -18,26 +15,25 @@ library(tidyverse)
 #                 `rh (%)`)
 # 
 # data = data %>%
-#   mutate(Date = format(as.Date(dmy_hms(`Date Time`)), "%Y-%m")) %>%
+#   mutate(Date = format(as.Date(dmy_hms(`Date Time`)), "%Y-%m-%d")) %>%
 #   group_by(Date) %>%
 #   summarise(Temperature = mean(`T (degC)`),
 #             RelativeHumidity = mean(`rh (%)`))
 # 
-# readr::write_csv(as.data.frame(data), file = "max_planck_weather_monthly.csv")
+# readr::write_csv(as.data.frame(data), file = "max_planck_weather_daily.csv")
 
 # importando dados
-data = read_csv("https://raw.githubusercontent.com/gabriel-alvaro/ME607-1S2023/main/models_EDA/max_planck_weather_monthly.csv")
+data = read_csv("https://raw.githubusercontent.com/gabriel-alvaro/ME607-1S2023/main/models_EDA/max_planck_weather_daily.csv")
 
 # grafico
-data %>% ggplot(aes(x = as.Date(paste(Date, "-01", sep="")), y = Temperature)) +
+data %>% ggplot(aes(x = Date, y = Temperature)) +
   geom_line() +
-  xlab("Data") +
-  ylab("Temperatura (Celsius)") +
+  xlab("Date") +
+  ylab("Temperature (Celsius)") +
   theme_minimal() +
-  scale_x_date(date_labels = "%Y-%m",
+  scale_x_date(date_labels = "%Y-%m-%d",
                date_breaks = "1 year") +
   scale_y_continuous(n.breaks = 6) +
   theme(axis.text.x=element_text(angle=60, hjust=1))
-
 
 
