@@ -17,7 +17,7 @@ library(tidyverse)
 # # daily
 # data_daily = data |>
 #   mutate(Date = format(as.Date(dmy_hms(`Date Time`)), "%Y-%m-%d")) |>
-#   filter(year(Date) >= 2014) |>
+#   filter(year(Date) %in% c(2014, 2015, 2016)) |>
 #   group_by(Date) |>
 #   summarise(Temperature = mean(`T (degC)`),
 #             RelativeHumidity = mean(`rh (%)`))
@@ -28,17 +28,14 @@ library(tidyverse)
 #   group_by(Date) |>
 #   summarise(Temperature = mean(`T (degC)`),
 #             RelativeHumidity = mean(`rh (%)`)) |>
-#   filter(year(yearmonth(data_monthly$Date)) %in% c(2014, 2015, 2016))
+#   filter(year(yearmonth(Date)) %in% c(2014, 2015, 2016))
 # 
 # readr::write_csv(as.data.frame(data_daily), file = "max_planck_weather_daily.csv")
 # readr::write_csv(as.data.frame(data_monthly), file = "max_planck_weather_monthly.csv")
 
-
 # importando e tratando dados
-# queremos somente os dados a partir de 2014
 weather = read_csv("https://raw.githubusercontent.com/gabriel-alvaro/ME607-1S2023/main/models_EDA/max_planck_weather_daily.csv")
-weather = as_tsibble(weather) |>
-  filter(year(Date) >= 2014)
+weather = as_tsibble(weather)
 
 scan_gaps(weather)
 
@@ -49,7 +46,7 @@ weather = weather |> fill_gaps(Temperature = mean(Temperature),
 autoplot(weather, .vars = Temperature) +
   xlab("Date") +
   ylab("Temperature (Celsius)") +
-  ggtitle("Temperature (°C) in Jena, Germany from 2014 to 2016") +
+  ggtitle("Temperature (°C) in Jena, Germany from 2014 to 01-01-2016") +
   theme_bw() +
   scale_y_continuous(n.breaks = 6) +
   scale_x_yearmonth(date_breaks = "1 year",
