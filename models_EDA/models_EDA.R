@@ -115,12 +115,13 @@ hist = snaive_res |>
   xlab("Residuals") +
   ylab("Density")
 
-# normality test
-shapiro.test(snaive_res$.resid)
-
 # autocorrelation
 acf = acf(snaive_res,
-          type = "correlation")
+          type = "correlation",
+          lag.max = 24)
+
+# normality test
+shapiro.test(snaive_res$.resid)
 
 # autocorelation tests
 Box.test(snaive_res$.resid, type = "Box-Pierce", lag = 24)
