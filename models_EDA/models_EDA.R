@@ -27,26 +27,34 @@ library(tidyverse)
 #   mutate(Date = format(as.Date(dmy_hms(`Date Time`)), "%Y-%m")) |>
 #   group_by(Date) |>
 #   summarise(Temperature = mean(`T (degC)`),
-#             RelativeHumidity = mean(`rh (%)`)) |>
-#   filter(year(yearmonth(Date)) %in% c(2014, 2015, 2016))
+#             RelativeHumidity = mean(`rh (%)`))
 # 
 # readr::write_csv(as.data.frame(data_daily), file = "max_planck_weather_daily.csv")
 # readr::write_csv(as.data.frame(data_monthly), file = "max_planck_weather_monthly.csv")
 
 # importing
-weather = read_csv("https://raw.githubusercontent.com/gabriel-alvaro/ME607-1S2023/main/models_EDA/max_planck_weather_daily.csv")
-weather = as_tsibble(weather)
+weather = read_csv("https://raw.githubusercontent.com/gabriel-alvaro/ME607-1S2023/main/models_EDA/max_planck_weather_monthly.csv")
+
+# for daily data
+# weather = as_tsibble(weather) %>%
+#   select(Date, Temperature)
+
+# for monthly data
+weather = weather |>
+  mutate(Date = yearmonth(Date)) |>
+  select(Date, Temperature) |>
+  as_tsibble()
 
 # treating missing data
 scan_gaps(weather)
-weather = weather |> fill_gaps(Temperature = mean(Temperature),
-                               RelativeHumidity = mean(RelativeHumidity))
+weather = weather |> 
+  fill_gaps(Temperature = mean(Temperature))
 
 # plot
 autoplot(weather, .vars = Temperature) +
   xlab("Date") +
   ylab("Temperature (Celsius)") +
-  ggtitle("Temperature (°C) in Jena, Germany from 2014 to 2016") +
+  ggtitle("Monthly average of temperature (°C) in Jena, Germany from 2009 to 2017") +
   theme_bw() +
   scale_y_continuous(n.breaks = 6) +
   scale_x_yearmonth(date_breaks = "1 year",
@@ -55,54 +63,68 @@ autoplot(weather, .vars = Temperature) +
 
 ## MODELS
 ## mean, naive, seasonal naive, drift, linear regression, exponential smoothing
-
 ## sampling
-weather_train_rw = weather |>
-  tile_tsibble(.size = 50)
+# weather_train_rw = weather |>
+#   tile_tsibble(.size = 180)
 
-## training all models
-weather_acc = weather_train_rw |>
+weather_train_sw = weather |>
+  stretch_tsibble(.step = 1, .init = 12)
+
+## training models (h = 5)
+accuracy_h5 = weather_train_sw |>
   model(mean = MEAN(Temperature),
         naive = NAIVE(Temperature),
         snaive = SNAIVE(Temperature ~ lag(12)),
-        drift = RW(Temperature ~ drift())) |>
-  forecast(h = 1) |>
-  accuracy(weather) |>
-  arrange(RMSE)
-
-weather_acc
-
-## training all models (h = 3)
-weather_train_rw |>
-  model(mean = MEAN(Temperature),
-        naive = NAIVE(Temperature),
-        snaive = SNAIVE(Temperature ~ lag(12)),
-        drift = RW(Temperature ~ drift())) |>
-  forecast(h = 3) |>
-  group_by(.id) |>
+        drift = RW(Temperature ~ drift()),
+        lm = TSLM(Temperature ~ Date),
+        exphw = ETS(Temperature ~ error("A"))) |>
+  forecast(h = 5) |>
+  group_by(.id, .model) |>
   mutate(h = row_number()) |>
   ungroup() |>
   as_fable(response = "Temperature", distribution = Temperature) |>
-  accuracy(weather, by = c("h", ".model")) |>
-  arrange(RMSE)
+  accuracy(weather, by = c("h", ".model"))
 
-# check accuracy statistics
-weather_acc
+accuracy_h5 |>
+  select(h, .model, RMSE) |>
+  arrange(h, RMSE) |>
+  pivot_wider(names_from = .model, values_from = RMSE)
 
-# use best performing model
+# using best performing model (SNAIVE)
 fit = weather |>
-  model(mean = NAIVE(Temperature))
+  model(snaive = SNAIVE(Temperature ~ lag(12)))
 
-# fit model to series and plot
 fit |> 
-  forecast(h = 1) |> 
-  autoplot(
-    weather |>
-      filter(Date >= "2016-06-01"),
-    level = NULL
-  )
+  forecast(h = 5) |> 
+  autoplot(weather, level = NULL)
 
-# check residuals
+
+snaive = forecast::snaive(weather)
+
+# diagnostic
 fit |> gg_tsresiduals()
+
+snaive_res = residuals(fit) |> na.exclude()
+
+# plot and mean
+autoplot(snaive_res, .vars = .resid) +
+  geom_hline(yintercept = mean(snaive_res$.resid),
+             col = 'red', linetype = 'dashed')
+
+# histogram
+hist(snaive_res$.resid, breaks = 20)
+
+# autocorrelation
+acf(snaive_res,
+    type = "correlation")
+
+# autocorelation tests
+Box.test(snaive_res$.resid, type = "Box-Pierce", lag = 12)
+Box.test(snaive_res$.resid, type = "Ljung-Box" ,lag = 12)
+
+# normality test
+shapiro.test(snaive_res$.resid)
+
+
 
 
