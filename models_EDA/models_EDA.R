@@ -11,23 +11,20 @@ library(tidyverse)
 # data = readr::read_csv("max_planck_weather_ts.csv")
 # 
 # data = data |> select(`Date Time`,
-#                 `T (degC)`,
-#                 `rh (%)`)
+#                 `T (degC)`)
 # 
 # # daily
 # data_daily = data |>
 #   mutate(Date = format(as.Date(dmy_hms(`Date Time`)), "%Y-%m-%d")) |>
 #   filter(year(Date) %in% c(2014, 2015, 2016)) |>
 #   group_by(Date) |>
-#   summarise(Temperature = mean(`T (degC)`),
-#             RelativeHumidity = mean(`rh (%)`))
+#   summarise(Temperature = mean(`T (degC)`))
 # 
 # # monthly
 # data_monthly = data |>
 #   mutate(Date = format(as.Date(dmy_hms(`Date Time`)), "%Y-%m")) |>
 #   group_by(Date) |>
-#   summarise(Temperature = mean(`T (degC)`),
-#             RelativeHumidity = mean(`rh (%)`))
+#   summarise(Temperature = mean(`T (degC)`))
 # 
 # readr::write_csv(as.data.frame(data_daily), file = "max_planck_weather_daily.csv")
 # readr::write_csv(as.data.frame(data_monthly), file = "max_planck_weather_monthly.csv")
