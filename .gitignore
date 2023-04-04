@@ -50,3 +50,4 @@ rsconnect/
 *.zip
 models_EDA/max_planck_weather_ts.csv
 *.jpg
+*.png
