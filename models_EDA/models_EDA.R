@@ -33,13 +33,11 @@ library(tidyverse)
 weather = read_csv("https://raw.githubusercontent.com/gabriel-alvaro/ME607-1S2023/main/models_EDA/max_planck_weather_monthly.csv")
 
 # for daily data
-# weather = as_tsibble(weather) %>%
-#   select(Date, Temperature)
+# weather = as_tsibble(weather)
 
 # for monthly data
 weather = weather |>
   mutate(Date = yearmonth(Date)) |>
-  select(Date, Temperature) |>
   as_tsibble()
 
 # treating missing data
@@ -49,7 +47,7 @@ weather = weather |>
 
 # plot
 autoplot(weather, .vars = Temperature) +
-  xlab("Date") +
+  xlab("") +
   ylab("Temperature (Celsius)") +
   ggtitle("Monthly average of temperature (°C) in Jena, Germany from 2009 to 2017") +
   theme_bw() +
@@ -94,9 +92,6 @@ fit = weather |>
 fit |> 
   forecast(h = 5) |> 
   autoplot(weather, level = NULL)
-
-
-snaive = forecast::snaive(weather)
 
 # diagnostic
 fit |> gg_tsresiduals()
