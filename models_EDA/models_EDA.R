@@ -99,24 +99,29 @@ fit |> gg_tsresiduals()
 snaive_res = residuals(fit) |> na.exclude()
 
 # plot and mean
-autoplot(snaive_res, .vars = .resid) +
+mean = autoplot(snaive_res, .vars = .resid) +
+  xlab("") +
+  ylab("Residuals") +
   geom_hline(yintercept = mean(snaive_res$.resid),
-             col = 'red', linetype = 'dashed')
+             col = 'red', linetype = 'dashed') +
+  theme_bw()
 
 # histogram
-hist(snaive_res$.resid, breaks = 20)
-
-# autocorrelation
-acf(snaive_res,
-    type = "correlation")
-
-# autocorelation tests
-Box.test(snaive_res$.resid, type = "Box-Pierce", lag = 12)
-Box.test(snaive_res$.resid, type = "Ljung-Box" ,lag = 12)
+hist = snaive_res |>
+  ggplot(aes(x = .resid, y = ..density..)) +
+  geom_histogram(bins = 15, colour = 1, fill = "lightblue") +
+  geom_density(col = "red", fill = 2, alpha = 0.2, linetype = 2) +
+  theme_bw() +
+  xlab("Residuals") +
+  ylab("Density")
 
 # normality test
 shapiro.test(snaive_res$.resid)
 
+# autocorrelation
+acf = acf(snaive_res,
+          type = "correlation")
 
-
-
+# autocorelation tests
+Box.test(snaive_res$.resid, type = "Box-Pierce", lag = 24)
+Box.test(snaive_res$.resid, type = "Ljung-Box" , lag = 24)
