@@ -52,16 +52,17 @@ mm_estimation = function(x, p){
   return (est_params)
 }
 
-# generating AR(3)
-set.seed(1234)
-x = 0.05 + arima.sim(n = 1000, model = list(ar = 0.3, 0.6, 0.9), sd = 1.5)
-p = 3
-
-mm_estimation(x, p)
-
 # generating AR(1)
-set.seed(1234)
-x <- 0.05 + arima.sim(n = 1000, list(ar = 0.5), sd = 2)
-p = 1
+set.seed(171822)
+x_1 <- 0.05 + arima.sim(n = 1000, list(ar = 0.5), sd = 2)
+mm_estimation(x_1, 1)
 
-mm_estimation(x, p)
+# generating AR(2)
+set.seed(171822)
+x_2 <- arima.sim(n = 1000, list(ar = c(1.5, -0.75)), sd = 1)
+mm_estimation(x_2, 2)
+
+# generating AR(6)
+set.seed(171822)
+x_6 <- arima.sim(n = 1000, list(ar = c(-0.5, -0.3, -0.1,  0.1,  0.3,  0.5)), sd = 1)
+mm_estimation(x_6, 6)
