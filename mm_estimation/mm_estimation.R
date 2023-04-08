@@ -1,5 +1,6 @@
 ## ME607
 ## Gabriel Alvaro Batista - RA 171822
+## https://github.com/gabriel-alvaro/ME607-1S2023/tree/main/mm_estimation
 
 ## AR(P) Parameter Estimation by Method of Moments
 mm_estimation = function(x, p){
