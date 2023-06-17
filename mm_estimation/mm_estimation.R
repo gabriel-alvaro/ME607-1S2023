@@ -38,7 +38,8 @@ mm_estimation = function(x, p){
   # estimates CI for phi
   phi_CI = matrix(0, nrow = p, ncol = 2)
   for(i in 1:p){
-    phi_CI[i,] = c(phi[i] - 1.96*sqrt(ACOV[i,i]), phi[i] + 1.96*sqrt(ACOV[i,i]))
+    phi_CI[i,] = c(phi[i] - 1.96*sqrt(ACOV[i,i]), 
+                   phi[i] + 1.96*sqrt(ACOV[i,i]))
   }
   
   rownames(phi_CI) = paste0("phi", 1:p)
@@ -60,10 +61,11 @@ mm_estimation(x_1, 1)
 
 # generating AR(2)
 set.seed(171822)
-x_2 <- arima.sim(n = 1000, list(ar = c(1.5, -0.75)), sd = 1)
+x_2 <- arima.sim(n = 144, list(ar = c(1.5, -0.75)), sd = 1)
 mm_estimation(x_2, 2)
 
 # generating AR(6)
 set.seed(171822)
 x_6 <- arima.sim(n = 1000, list(ar = c(-0.5, -0.3, -0.1,  0.1,  0.3,  0.5)), sd = 1)
 mm_estimation(x_6, 6)
+
